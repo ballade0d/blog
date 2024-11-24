@@ -1,10 +1,4 @@
----
-title: "Web组 第五次授课"
-description: "异常处理、IO、多线程与反射"
-date: "Nov 9 2024"
----
-
-# 异常处理、IO、多线程与反射
+# 异常处理、IO、多线程、Maven及常用的库
 
 ## 异常
 
@@ -28,7 +22,7 @@ graph LR;
 
 #### Error
 
-程序在执行过程中所遇到的硬件或操作系统的错误。错误对程序而言是致命的，将导致程序无法运行。常见的错误有内存溢出，JVM 自身的非正常运行，class 文件没有主方法。程序本身无法处理 Error，而是交给系统来处理。
+程序在执行过程中所遇到的硬件或操作系统的错误。错误对程序而言是致命的，将导致程序无法运行。常见的错误有内存溢出，JVM自身的非正常运行，class文件没有主方法。程序本身无法处理Error，而是交给系统来处理。
 
 #### Exception
 
@@ -36,11 +30,11 @@ graph LR;
 
 ### 抛出异常
 
-```java
+``` java
 throw new ExampleException();
 ```
 
-```java
+``` java
 void exampleMethod() throws ExampleException {
   // ...
 }
@@ -48,10 +42,10 @@ void exampleMethod() throws ExampleException {
 
 ### 处理异常
 
-```java
+``` java
 try {
   // code
-} catch (ExampleException e){
+} catch (ExampleException e) {
   // 捕获到异常Exception
 } finally {
   // 最终执行
@@ -60,7 +54,7 @@ try {
 
 ### 自定义异常
 
-```java
+``` java
 class MyException extends RuntimeException {
   // ...
 }
@@ -68,16 +62,24 @@ class MyException extends RuntimeException {
 
 ## IO
 
-I/O 即输入 Input/ 输出 Output 的缩写，其实就是计算机调度把各个存储中（包括内存和外部存储）的数据写入写出的过程。java 中用“流（stream）”来抽象表示这么一个写入写出的功能，封装成一个“类”，都放在 java.io 这个包里面。流代表了数据的无结构化传递。
+ I/O 即输入Input/ 输出Output的缩写，其实就是计算机调度把各个存储中（包括内存和外部存储）的数据写入写出的过程。java中用“流（stream）”来抽象表示这么一个写入写出的功能，封装成一个“类”，都放在java.io这个包里面。流代表了数据的无结构化传递。
 
-### 文件 IO
+### 读取键盘输入
 
-```java
+``` java
+Scanner scanner = new Scanner(System.in);
+
+int i = scanner.nextInt();
+```
+
+### 文件IO
+
+``` java
 FileInputStream inputStream = new FileInputStream("file path");
 FileOutputStream outputStream = new FileOutputStream("file path");
 ```
 
-### 网络 IO
+### 网络IO
 
 ```java
 URI uri = new URI("https://www.baidu.com");
@@ -86,7 +88,7 @@ InputStream inputStream = uri.toURL().openStream();
 
 举例：下载文件到本地
 
-```java
+``` java
 long start = System.currentTimeMillis();
 InputStream stream = new URI("http://blog.dylan-deng.love/markdown.md").toURL().openStream();
 File file = new File("file.md");
@@ -102,9 +104,9 @@ out.close();
 
 ## New IO
 
-Java NIO 用于提高输入输出操作的效率。它提供的缓冲区等工具可以让你构建出高效率、高性能的应用。
+Java NIO用于提高输入输出操作的效率。它提供的缓冲区等工具可以让你构建出高效率、高性能的应用。
 
-```java
+``` java
 long start = System.currentTimeMillis();
 InputStream stream = new URI("http://blog.dylan-deng.love/markdown.md").toURL().openStream();
 File file = new File("file.md");
@@ -115,7 +117,7 @@ System.out.println("花费时间 " + (end - start) + "ms");
 
 ## 多线程
 
-```java
+``` java
 // 下载大量文件
 long start = System.currentTimeMillis();
 for (int i = 1; i <= 10; i++) {
@@ -137,19 +139,19 @@ System.out.println("花费时间 " + (end - start) + "ms");
 
 线程是进程中的一个实体，是被系统独立调度和分派的基本单位。一个进程可以由多个线程组成，它们共享进程的内存空间和资源，但每个线程拥有自己的执行堆栈和程序计数器。
 
-### CPU 核心
+### CPU核心
 
-CPU 核心是处理器中的一个物理单元，负责执行程序指令。一个 CPU 核心在任一时刻只能执行一个任务。
+CPU核心是处理器中的一个物理单元，负责执行程序指令。一个CPU核心在任一时刻只能执行一个任务。
 
 如何启动一个线程？
 
-```java
+``` java
 new Thread(()->{
     // ...
 }).start();
 ```
 
-```java
+``` java
 long start = System.currentTimeMillis();
 for (int i = 1; i <= 10; i++) {
 		String fileName = "file" + i + ".md";
@@ -167,12 +169,12 @@ long end = System.currentTimeMillis();
 System.out.println("花费时间 " + (end - start) + "ms");
 ```
 
-```mermaid
+``` mermaid
 gantt
 	dateFormat x
 	axisFormat %H:%M:%S
     title 多线程
-
+    
 定义start变量: 1652187038860, 0.1s
 线程1: 1652187038960, 1.1s
 线程2: 1652187038970, 1.0s
@@ -183,7 +185,7 @@ gantt
 
 ### 线程安全
 
-```java
+``` java
 public class UnsafeCounter {
     private int count = 0;
 
@@ -229,13 +231,33 @@ public class UnsafeCounter {
 
 **问题**
 
-在多线程环境中，因为线程切换的时机是不确定的，两个线程可能同时读取相同的 `count` 值，然后各自增加 1，并将它写回，导致实际上丢失了一次增加操作。例如，如果两个线程同时读取 `count` 为 0，即使它们都执行了增加操作，`count` 最终值可能还是只增加了 1，成为 1 而不是 2。
+考虑一个简单的整数加法操作，如 `count = count + 1`。尽管这看起来是一条简单的语句，但在多数处理器上，这个操作涉及下面几个步骤：
+
+1. 从内存中读取 `count` 的当前值。
+2. 在处理器中增加该值。
+3. 将新值写回内存。
+
+如果两个线程同时执行这个操作，那么可能出现以下情况：
+
+- 线程A读取 `count` 的值为1。
+- 线程B也读取 `count` 的值为1。
+- 线程A增加值到2，并写回内存。
+- 线程B也增加值到2，并写回内存。
+
+在这种情况下，虽然 `count = count + 1` 被执行了两次，但 `count` 的值只从1变到2
 
 **正确的同步**
 
+### 解决非原子操作引发的问题
+
+为了避免非原子操作可能引起的问题而采取的策略：
+
+- **锁定**：通过锁或其他同步机制确保在某一时刻只有一个线程可以执行某个操作。
+- **原子操作**：使用可以在单个操作中完成的原子性指令（例如，硬件支持的原子指令集）。
+
 为了避免这种情况，可以使用 Java 的同步关键字 `synchronized` 。使用 `synchronized` 后，`increment` 方法在任何时候最多只能由一个线程进入，这样就可以保证 `count++` 操作的线程安全性。
 
-```java
+``` java
 public synchronized void increment() {
     count++;
 }
@@ -243,7 +265,7 @@ public synchronized void increment() {
 
 另一种写法：修饰代码块
 
-```java
+``` java
 public void increment() {
 		synchronized (this){
 				++count;
@@ -257,78 +279,90 @@ public void increment() {
 - 对于实例方法建议使用`this`作为锁对象
 - 对于静态方法建议使用类对象作为锁对象`类名.class`
 
-## 反射
+## Maven
 
-在 Java 中，反射是一种强大的机制，它允许程序在运行时检查或修改其自身行为。使用反射，程序能够访问类的属性和方法，即使在编译时这些类的名称并未明确给出。这使得 Java 程序可以在运行时动态地创建对象、调用方法、改变字段等，即便这些类、方法或字段在编写原始代码时不可知。
-
-```java
-// 举例：输出一个类所有的字段和方法
-public class Main {
-
-    int field1;
-
-    void method1() {
-    }
-
-    void method2() {
-    }
-
-    public static void main(String[] args) throws InterruptedException, Exception {
-        Class<?> clazz = Main.class;
-        for (Field field : clazz.getDeclaredFields()) {
-            System.out.println("Field: " + field.getName());
-        }
-        for (Method method : clazz.getDeclaredMethods()) {
-            System.out.println("Method: " + method.getName());
-        }
-    }
-}
+```mermaid
+graph LR
+    A[清理] --> B[编译]
+    B --> C[测试]
+    C --> D[打包]
+    D --> E[验证]
+    E --> F[部署]
 ```
 
-```java
-// 举例：调用一个方法
-Class<?> clazz = Main.class;
-Constructor<?> constructor = clazz.getConstructor();
-Object instance = constructor.newInstance();
-clazz.getDeclaredMethod("method1").invoke(instance);
+Apache Maven，是一个项目管理及自动构建工具，由Apache软件基金会所提供。Maven解决了软件构建的两方面问题：一是软件是如何构建的，二是软件的依赖关系。
+
+Maven项目使用项目对象模型（Project Object Model，POM）来配置。它的格式是XML（Extensible Markup Language）
+
+``` xml
+<?xml version="1.0" encoding="UTF-8"?>
+<!--project是pom.xml根元素，它包含了pom.xml的一些约束信息-->
+<!-- xmlns										命名空间，类似包名-->
+<!-- xmlns:xsi								xml遵循的标签规范-->
+<!--xsi:schemaLocation				定义xmlschema的地址，xml书写时需要遵循的语法-->
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+		<!-- 指定了当前pom.xml版本，目前固定为4.0.0版本。-->
+    <modelVersion>4.0.0</modelVersion>
+
+    <!--  属于哪个组，一般是域名的倒序  -->
+    <groupId>fun.sast</groupId>
+		<!--  定义当前项目的唯一ID，一个groupId下面可能多个项目 -->
+    <artifactId>maven-demo</artifactId>
+  	<!--  定义项目当前的版本  -->
+    <version>1.0-SNAPSHOT</version>
+
+  	<!--  定义变量，在其他地方进行使用  -->
+    <properties>
+      	<!--java版本 -->
+        <maven.compiler.source>21</maven.compiler.source>
+        <maven.compiler.target>21</maven.compiler.target>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    </properties>
+		<!--定义的依赖清单，有所依赖包都需要写在这个标签里面-->
+		<dependencies>
+      ...
+  	</dependencies>
+  
+  	<!--项目的构建配置-->
+  	<build>
+  	</build>
+</project>
 ```
 
-Class 类中用于获取构造方法的方法
+### 常用的库
 
-| 方法名                                                         | 描述                           |
-| -------------------------------------------------------------- | ------------------------------ |
-| Constructor<?>[] getConstructors()                             | 返回所有公共构造方法对象的数组 |
-| Constructor<?>[] getDeclaredConstructors()                     | 返回所有构造方法对象的数组     |
-| Constructor getConstructor(Class<?>... parameterTypes)         | 返回单个公共构造方法对象       |
-| Constructor getDeclaredConstructor(Class<?>... parameterTypes) | 返回单个构造方法对象           |
+**核心功能库**
 
-Constructor 类中用于创建对象的方法
+1. **Apache Commons** - 提供了 Java 标准库未包含的一些基本实用工具类。
+   - **Commons Lang** - 提供额外的数据类型操作，例如字符串处理、数值处理、并发包等。
+   - **Commons IO** - 增强的文件和输入/输出流处理。
+   - **Commons Collections** - 扩展了标准 Java Collections Framework 的功能。
 
-| 方法名                            | 描述                         |
-| --------------------------------- | ---------------------------- |
-| T newInstance(Object... initargs) | 根据指定的构造方法创建对象   |
-| void setAccessible(boolean flag)  | 设置为 true,表示取消访问检查 |
+2. **Google Guava** - 类似于 Apache Commons，它提供了大量的核心库功能，如集合处理、缓存、普通工具类和并发库。
 
-**反射获取成员变量**
+**网络通信库**
 
-| 方法名                                  | 描述                           |
-| --------------------------------------- | ------------------------------ |
-| Field[] getFields()                     | 返回所有公共成员变量对象的数组 |
-| Field[] getDeclaredFields()             | 返回所有成员变量对象的数组     |
-| Field getField(String name)             | 返回单个公共成员变量对象       |
-| Field getDeclaredField(String name)     | 返回单个成员变量对象           |
-| void set(Object instance, Object value) | 给指定对象的成员变量赋值       |
-| Object get(Object instance)             | 返回成员变量的值               |
+1. **Netty** - 提供异步和事件驱动的网络应用程序框架和工具，用于快速开发高性能、高可靠性的网络服务器和客户端。
+2. **OkHttp** - 是一个处理 HTTP 和 HTTP/2 请求的现代库，易于使用，并提供了同步和异步调用能力。
 
-### 作用？
+**数据库交互库**
 
-Spring 框架的实现
+1. **Hibernate** - 一个强大的对象关系映射 (ORM) 框架，它对 JDBC 进行了抽象，允许开发者通过 Java 对象而非复杂的 SQL 与数据库交互。
+2. **MyBatis** - 一个半 ORM 和 SQL 映射框架，它提供了映射标记语言来配合 SQL 语句的执行。
 
-- Spring 框架的核心功能之一是依赖注入，它允许组件（beans）之间的依赖关系通过配置方式来管理，而不是通过组件内部硬编码。Spring 通过反射实现了这一机制。
-- Spring AOP（面向切面编程）允许开发者定义方法拦截器和切点，来统一处理诸如事务管理、安全检查、日志记录等横切关注点。在运行时，使用反射调用方法前后，可以插入额外的操作。
+**Web 开发框架**
 
-### 缺点
+1. **Spring Framework** - 提供了一个全面的编程和配置模型，为现代 Java 基础的企业应用提供了支持，包括 Spring MVC 用于 Web 应用。
+2. **Vert.x** - 提供了用于构建响应式 Web 和企业级应用的异步编程模型，支持多种 JVM 语言，适合高性能和高并发的应用场景。
 
-- 性能开销：由于反射涉及动态解析的类型，因此无法执行某些 Java 虚拟机优化。 因此，反射操作的性能要比非反射操作的性能要差，应该在性能敏感的应用程序中频繁调用的代码段中避免。
-- 破坏封装性：反射调用方法时可以忽略权限检查，因此可能会破坏封装性而导致安全问题。
-- 内部曝光：由于反射允许代码执行在非反射代码中非法的操作，例如访问私有字段和方法，所以反射的使用可能会导致意想不到的副作用，这可能会导致代码功能失常并可能破坏可移植性。
+**测试库**
+
+1. **JUnit** - 广泛使用的单元测试框架。
+
+**JSON 处理库**
+
+1. **Jackson** - 快速处理 JSON 的库，支持 JSON 到 Java 对象的序列化和反序列化。
+2. **Gson** - Google 提供的用于序列化和反序列化 JSON 的库，易于使用。
+
