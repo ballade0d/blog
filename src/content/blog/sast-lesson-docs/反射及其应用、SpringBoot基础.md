@@ -1,7 +1,7 @@
 ---
-title: "Web组 第五次授课"
-description: "异常处理、IO、多线程、Maven及常用的库"
-date: "Nov 17 2024"
+title: "Web组 第六次授课"
+description: "反射及其应用、SpringBoot基础"
+date: "Nov 24 2024"
 ---
 
 ## 反射及其应用、SpringBoot 基础
